@@ -16,3 +16,7 @@ Visualizer Token based on [Boba Network Token List](https://github.com/bobanetwo
 
 #### yarn
 #### yarn start
+
+
+## Live example 
+https://boba-token-list.netlify.app/
