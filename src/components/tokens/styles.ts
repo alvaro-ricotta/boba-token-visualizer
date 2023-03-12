@@ -107,7 +107,7 @@ export const ClipboardAddress = styled.img`
   }
 `
 
-export const AddMetamask = styled.img`
+export const MetamaskButton = styled.img`
   width:25px;
   margin-left:10px;
   cursor:pointer;

@@ -22,6 +22,13 @@ export const Chain: SupportedChain = {
     2888: "Boba Göerli",
 };
 
+export const Rpc:SupportedChainExplorer = {
+    "Ethereum" : 'https://api.mycryptoapi.com/eth',
+    "Göerli" : 'https://rpc.goerli.mudit.blog/',
+    "Boba Network" : 'https://lightning-replica.boba.network/',
+    "Boba Göerli" : 'https://goerli.boba.network',    
+}
+
 
 export const ChainExplorer:SupportedChainExplorer = {
     "Ethereum" : 'https://etherscan.io',

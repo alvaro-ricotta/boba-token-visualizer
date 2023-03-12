@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-
+import { utils } from "ethers";
 import { TokenType, Chain, ChainColor, ChainExplorer } from "./types";
+import toast from "react-hot-toast";
+
 import {
   TokensContainer,
   Token,
@@ -17,8 +19,10 @@ import {
   TokenContainer,
   NetworkAddress,
   ClipboardAddress,
+  MetamaskButton,
 } from "./styles";
 import Clipboard from "../../clipboard.svg";
+import Metamask from "../../metamask.svg";
 
 const tokenListUrl =
   "https://bobanetwork.github.io/token-list/boba.tokenlist.json";
@@ -28,6 +32,7 @@ export const Tokens = () => {
   const [chains, setChains] = useState<number[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
   const [chainFilter, setChainFilter] = useState<number>(0);
+  const { ethereum } = window as any;
 
   useEffect(() => {
     axios.get(tokenListUrl).then((response) => setTokens(response.data.tokens));
@@ -43,17 +48,60 @@ export const Tokens = () => {
     })
   );
 
+  const message = (text: string) => toast(text);
+
   const filteredTokenByChain = chainFilter
     ? filteredToken.filter((x) => x.chainId === chainFilter)
     : filteredToken;
 
-  const handleClipboard = (address: string) => {
+  const handleClipboard = (token: TokenType) => {
+    const { address, symbol, chainId } = token;
+    message(
+      `The ${symbol} address was successfully copied to the ${Chain[chainId]} network. `
+    );
     navigator.clipboard.writeText(address);
   };
 
   const handleExplorer = (chain: string, address: string) => {
     const explorer = ChainExplorer[chain];
     window.open(`${explorer}/address/${address}`, "_blank");
+  };
+
+  const updateNetwork = async (hexChain: string, chain: number) => {
+    await ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: hexChain }],
+    });
+    message(
+      `We have updated your network to ${Chain[chain]}, please open your Metamask in order to add the requested token.`
+    );
+  };
+
+  const addToken = async (token: TokenType) => {
+    const { address, symbol, decimals, logoURI, chainId, name } = token;
+    await ethereum.request({
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: {
+          address,
+          symbol,
+          decimals,
+          image: logoURI,
+          chainId,
+        },
+      },
+    });
+    message(
+      `We have successfully added the ${name} token to your ${Chain[chainId]} network`
+    );
+  };
+
+  const addToMetamask = async (token: TokenType) => {
+    const hexChain = utils.hexValue(token.chainId);
+    if (ethereum.networkVerison !== token.chainId)
+      await updateNetwork(hexChain, token.chainId);
+    addToken(token);
   };
 
   return (
@@ -106,8 +154,12 @@ export const Tokens = () => {
                 </AddressContainer>
                 <ClipboardAddress
                   src={Clipboard}
-                  onClick={() => handleClipboard(address)}
+                  onClick={() => handleClipboard(token)}
                   aria-pressed
+                />
+                <MetamaskButton
+                  src={Metamask}
+                  onClick={() => addToMetamask(token)}
                 />
               </NetworkAddress>
             </Token>
