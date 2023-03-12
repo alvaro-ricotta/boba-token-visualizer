@@ -2,6 +2,10 @@ interface SupportedChain {
     [key: number]: string;
 }
 
+interface SupportedChainExplorer {
+    [key: string]: string;
+}
+
 export type ChainColorScheme = {
     color: string;
     background:string;
@@ -16,6 +20,14 @@ export const Chain: SupportedChain = {
     5: "Göerli",
     288: "Boba Network",
     2888: "Boba Göerli",
+};
+
+
+export const ChainExplorer:SupportedChainExplorer = {
+    "Ethereum" : 'https://etherscan.io',
+    "Göerli" : 'https://goerli.etherscan.io',
+    "Boba Network" : 'https://bobascan.com',
+    "Boba Göerli" : 'https://testnet.bobascan.com',
 };
 
 export const ChainColor: SupportedColorChain = {

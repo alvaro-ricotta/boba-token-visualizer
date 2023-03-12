@@ -1,13 +1,14 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 
-import { TokenType, Chain, ChainColor } from "./types";
+import { TokenType, Chain, ChainColor, ChainExplorer } from "./types";
 import {
   TokensContainer,
   Token,
   Name,
   NetworkContainer,
   Network,
+  AddressContainer,
   Address,
   Filters,
   ChainFilter,
@@ -19,20 +20,20 @@ import {
 } from "./styles";
 import Clipboard from "../../clipboard.svg";
 
-const tokenList =
+const tokenListUrl =
   "https://bobanetwork.github.io/token-list/boba.tokenlist.json";
 
 export const Tokens = () => {
-  const [tokens, setTokens] = React.useState<TokenType[]>([]);
-  const [chains, setChains] = React.useState<number[]>([]);
-  const [searchValue, setSearchValue] = React.useState<string>("");
-  const [chainFilter, setChainFilter] = React.useState<number>(0);
+  const [tokens, setTokens] = useState<TokenType[]>([]);
+  const [chains, setChains] = useState<number[]>([]);
+  const [searchValue, setSearchValue] = useState<string>("");
+  const [chainFilter, setChainFilter] = useState<number>(0);
 
-  React.useEffect(() => {
-    axios.get(tokenList).then((response) => setTokens(response.data.tokens));
+  useEffect(() => {
+    axios.get(tokenListUrl).then((response) => setTokens(response.data.tokens));
   }, []);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setChains([...new Set(tokens.map(({ chainId }) => chainId))]);
   }, [tokens]);
 
@@ -48,6 +49,11 @@ export const Tokens = () => {
 
   const handleClipboard = (address: string) => {
     navigator.clipboard.writeText(address);
+  };
+
+  const handleExplorer = (chain: string, address: string) => {
+    const explorer = ChainExplorer[chain];
+    window.open(`${explorer}/address/${address}`, "_blank");
   };
 
   return (
@@ -67,16 +73,20 @@ export const Tokens = () => {
           <SelectBox onChange={(e) => setChainFilter(Number(e.target.value))}>
             <option value={0}>All Networks</option>
             {chains.map((chain: number) => {
-              return <option value={chain}>{Chain[chain]}</option>;
+              return (
+                <option value={chain} key={chain}>
+                  {Chain[chain]}
+                </option>
+              );
             })}
           </SelectBox>
         </ChainFilter>
       </Filters>
       <TokenContainer>
-        {filteredTokenByChain.map((token: TokenType) => {
+        {filteredTokenByChain.map((token: TokenType, index: number) => {
           const { name, symbol, address, logoURI } = token;
           return (
-            <Token>
+            <Token key={index}>
               <img src={logoURI} alt={name} width="25" height="25" />
               <Name>{symbol}</Name>
               <NetworkContainer>
@@ -85,7 +95,15 @@ export const Tokens = () => {
                 </Network>
               </NetworkContainer>
               <NetworkAddress>
-                <Address>{address}</Address>
+                <AddressContainer>
+                  <Address
+                    onClick={() =>
+                      handleExplorer(Chain[token.chainId], address)
+                    }
+                  >
+                    {address}
+                  </Address>
+                </AddressContainer>
                 <ClipboardAddress
                   src={Clipboard}
                   onClick={() => handleClipboard(address)}

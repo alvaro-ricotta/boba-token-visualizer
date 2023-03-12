@@ -33,10 +33,22 @@ export const Network = styled.div<ChainColorScheme>`
   background: ${(props) => props.background};
   color: ${(props) => props.color};
 `;
-export const Address = styled.div`
-  width:420px;
+
+export const AddressContainer = styled.div`
+  width:375px;
   color: rgb(66 68 81);
 `;
+
+export const Address = styled.button`
+  background:transparent;
+  border:0px;
+  color:inherit;
+  cursor:pointer;
+  transition: color 0.2s ease;
+  &:hover {
+    color:#fff;
+  }
+`
 
 export const Filters = styled.div`
   display: flex;
